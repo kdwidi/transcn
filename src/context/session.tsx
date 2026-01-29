@@ -1,18 +1,22 @@
-import type { User } from "@/data/users"
+import type { User } from "@/data/users";
 import * as React from "react"
 import { useNavigate } from "react-router"
-import { UserContext } from "./users";
 import { toast } from "sonner";
 
-const SESSION_KEY = "user_id";
+const SESSION_KEY = "SESSION";
 
 type SessionProviderProps = {
   children: React.ReactNode,
 }
 
+type SessionData = {
+  user: User,
+  key: string,
+}
+
 type SessionContextType = {
-  current: User | null,
-  create: (user: User) => void,
+  data: SessionData | null,
+  create: (user: User, key: string) => void,
   destroy: () => void,
 }
 
@@ -21,39 +25,35 @@ export const SessionContext = React.createContext<SessionContextType | null>(nul
 export function SessionProviders({ children }: SessionProviderProps) {
   const navigate = useNavigate()
 
-  const users = React.useContext(UserContext);
+  const [data, setData] = React.useState<SessionData | null>(null);
 
-  const [current, setCurrent] = React.useState<User | null>(null);
-
-  function create(user: User) {
-    localStorage.setItem(SESSION_KEY, user.id);
-    setCurrent(user);
+  function create(user: User, key: string) {
+    let dt = { user, key };
+    setData(dt);
+    localStorage.setItem(SESSION_KEY, JSON.stringify(dt));
     toast.success("Berhasil login.")
   }
 
   function destroy() {
     localStorage.removeItem(SESSION_KEY);
-    setCurrent(null);
+    setData(null)
     toast.success("Berhasil logout.")
   }
 
   React.useEffect(() => {
-    let userId = localStorage.getItem(SESSION_KEY);
+    let dtString = localStorage.getItem(SESSION_KEY);
 
-    let foundUser = users?.data.find(u => u.id === userId);
-
-    if (!foundUser && location.pathname !== "/login") {
-      navigate("/login");
+    if (!dtString) {
+      if (location.pathname !== "/login") navigate("login");
       return;
     }
 
-    setCurrent(foundUser!);
     if (location.pathname === "/login") navigate("/dashboard");
 
-  }, [current])
+  }, [data])
 
   return (
-    <SessionContext.Provider value={{ current, create, destroy }}>
+    <SessionContext.Provider value={{ data, create, destroy }}>
       {children}
     </SessionContext.Provider>
   )

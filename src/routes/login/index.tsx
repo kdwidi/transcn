@@ -12,11 +12,9 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { useContext, useEffect } from "react"
+import { useContext } from "react"
 import { toast } from "sonner"
-import { useNavigate } from "react-router"
 import { SessionContext } from "@/context/session"
-import { UserContext } from "@/context/users"
 
 const formSchema = z.object({
   email: z.email("Format email tidak valid."),
@@ -24,24 +22,38 @@ const formSchema = z.object({
 })
 
 export default function Login() {
-  const navigate = useNavigate();
-
-  const session = useContext(SessionContext)
-  const users = useContext(UserContext)
+  const session = useContext(SessionContext);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: { email: "", password: "", }
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    let foundUser = users?.data.find(u => u.email === values.email);
-    if (!foundUser || "password123" !== values.password) {
-      toast.error("Email atau password anda salah.");
-      return;
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const result = await fetch("https://fe-test.salokapark.app/api/login", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        email: values.email,
+        password: values.password,
+      })
+    })
+
+    if (result.status !== 200) {
+      toast.error("Terjadi kesalahan: error code " + result.status);
+      return
     }
 
-    session?.create(foundUser)
+    const body = await result.json();
+    if (!body.success) {
+      toast.error("Login Gagal");
+      return;
+    };
+    const user = body.user;
+    const token = body.token;
+    session?.create(user, token)
   }
 
   return (

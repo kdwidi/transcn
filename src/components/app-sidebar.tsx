@@ -65,8 +65,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium">{session?.current?.name}</span>
-                    <span className="truncate text-xs">{session?.current?.email}</span>
+                    <span className="truncate font-medium">{session?.data?.user.name}</span>
+                    <span className="truncate text-xs">{session?.data?.user.email}</span>
                   </div>
                   <ChevronsUpDown className="ml-auto size-4" />
                 </SidebarMenuButton>
@@ -83,8 +83,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-medium">{session?.current?.name}</span>
-                      <span className="truncate text-xs">{session?.current?.email}</span>
+                      <span className="truncate font-medium">{session?.data?.user.name}</span>
+                      <span className="truncate text-xs">{session?.data?.user.email}</span>
                     </div>
                   </div>
                 </DropdownMenuLabel>
